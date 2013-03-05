@@ -222,6 +222,7 @@
 // main.cpp functions
 void							traceLastFunc ( const char *szFunc );
 void							Log ( const char *fmt, ... );
+void							LogDialog ( const char *fmt, ... );
 void							LogChatbox ( bool bLast, const char *fmt, ... );
 void							setDebugPointer ( void *ptr );
 

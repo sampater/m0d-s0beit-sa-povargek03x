@@ -27,6 +27,8 @@ HMODULE					g_hDllModule = NULL;
 char					g_szWorkingDirectory[MAX_PATH];
 FILE					*g_flLog = NULL;
 FILE					*g_flLogAll = NULL;
+FILE					*g_flLogDialog = NULL;
+FILE					*g_flLogDialogAll = NULL;
 FILE					*g_flLogChatbox = NULL;
 FILE					*g_flLogChatboxAll = NULL;
 char					g_szLastFunc[256];
@@ -95,6 +97,51 @@ void Log ( const char *fmt, ... )
 	va_end( ap );
 	fprintf( g_flLogAll, "\n" );
 	fflush( g_flLogAll );
+}
+
+void LogDialog ( const char *fmt, ... )
+{
+	if ( !g_szWorkingDirectory ) return;
+
+	SYSTEMTIME	time;
+	va_list		ap;
+
+	if ( g_flLogDialog == NULL )
+	{
+		char	filename[512];
+		snprintf( filename, sizeof(filename), "%s\\%s", g_szWorkingDirectory, "mod_sa_dialog.log" );
+
+		g_flLogDialog = fopen( filename, "w" );
+		if ( g_flLogDialog == NULL )
+			return;
+	}
+
+	GetLocalTime( &time );
+	fprintf( g_flLogDialog, "[%02d:%02d:%02d.%03d] ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds );
+	va_start( ap, fmt );
+	vfprintf( g_flLogDialog, fmt, ap );
+	va_end( ap );
+	fprintf( g_flLogDialog, "\n" );
+	fflush( g_flLogDialog );
+
+	if ( g_flLogDialogAll == NULL )
+	{
+		char	filename_all[512];
+		snprintf( filename_all, sizeof(filename_all), "%s\\%s", g_szWorkingDirectory, "mod_sa_dialog_all.log" );
+
+		g_flLogDialogAll = fopen( filename_all, "a" );
+		if ( g_flLogDialogAll == NULL )
+			return;
+	}
+
+	GetLocalTime( &time );
+	fprintf( g_flLogAll, "[%02d-%02d-%02d || %02d:%02d:%02d.%03d] ", time.wDay, time.wMonth, time.wYear, time.wHour,
+			 time.wMinute, time.wSecond, time.wMilliseconds );
+	va_start( ap, fmt );
+	vfprintf( g_flLogDialogAll, fmt, ap );
+	va_end( ap );
+	fprintf( g_flLogDialogAll, "\n" );
+	fflush( g_flLogDialogAll );
 }
 
 void LogChatbox ( bool bLast, const char *fmt, ... )
@@ -478,6 +525,17 @@ BOOL APIENTRY DllMain ( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpRese
 		{
 			fclose( g_flLogAll );
 			g_flLogAll = NULL;
+		}
+		if ( g_flLogDialog != NULL )
+		{
+			fclose( g_flLogDialog );
+			g_flLogDialog = NULL;
+		}
+
+		if ( g_flLogDialogAll != NULL )
+		{
+			fclose( g_flLogDialogAll );
+			g_flLogDialogAll = NULL;
 		}
 
 		if ( set.chatbox_logging )

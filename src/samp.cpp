@@ -1836,13 +1836,19 @@ uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
 
 	char dCaption[200];
 	sprintf(dCaption,"%s",caption);
+	if(!cheat_state->_generic.cheat_panic_enabled)
+	{
 	if(set.log_showed_dialogs)
 	{
-	Log("[SHOWDIALOG] Type: %d , ID: %d | Caption: %s, Text: %s, Button #1: %s, Button #2: %s",dialogType,dialogID,caption,text,button1,button2);
+	LogDialog("==================================================");
+	LogDialog("IP: %s:%d || Name: %s",g_SAMP->szIP,g_SAMP->ulPort,getPlayerName(g_Players->sLocalPlayerID));
+	LogDialog("[SHOWDIALOG] Type: %d , ID: %d | Caption: %s, Text: %s, Button #1: %s, Button #2: %s",dialogType,dialogID,caption,text,button1,button2);
+	LogDialog("==================================================");
 	}
 	if(set.show_dialog_id)
 	{
 	sprintf(dCaption,"%s  [ID: %d]",caption,dialogID);
+	}
 	}
 	showSampDialog(1,dialogID,dialogType,dCaption,text,button1,button2);
 	//end

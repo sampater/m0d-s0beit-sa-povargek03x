@@ -2,6 +2,11 @@ mod_sa
 by notaplane, jflm, nuckfuts, bartekdvd, povargek and the game modification community
 http://code.google.com/p/m0d-m0d-s0beit-sa/
 
+Version 4.4.3.2
+Added:
+Log of ShowDialogForPlayer (see mod_sa.ini)
+Show a SA:MP Dialog ID in dialog caption (see mod_sa.ini)
+
 Version 4.4.3.1
 * Added ShowDialogForPlayer func (by povargek)
 showSampDialog(int send, int dialogID,int typedialog, char *caption, char *text, char *button1, char *button2)
