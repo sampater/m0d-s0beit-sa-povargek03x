@@ -296,6 +296,12 @@ static void ini_init ( void )
 	if ( (ent = ini_register_entry("wine_compatibility", TYPE_BOOL)) != NULL )
 		ini_register_data( ent, &set.wine_compatibility, "false" );
 
+	if ( (ent = ini_register_entry("show_dialog_id", TYPE_BOOL)) != NULL )
+		ini_register_data( ent, &set.show_dialog_id, "false" );
+
+	if ( (ent = ini_register_entry("log_showed_dialogs", TYPE_BOOL)) != NULL )
+		ini_register_data( ent, &set.log_showed_dialogs, "false" );
+
 	if ( (ent = ini_register_entry("i_have_edited_the_ini_file", TYPE_BOOL)) != NULL )
 		ini_register_data( ent, &set.i_have_edited_the_ini_file, "false" );
 

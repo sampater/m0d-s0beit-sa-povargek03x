@@ -729,6 +729,11 @@ void sampMainCheat ()
 {
 	traceLastFunc( "sampMainCheat()" );
 	
+		if(hooksinstalled == 0 && g_SAMP != NULL)
+		{
+			installSAMPHooks ();
+		}
+
 	// anticrasher by povargek
 	memset_safe((DWORD*)(g_dwSAMP_Addr + SAMP_WARNING_COUNT), 0x00, 1);
 	// g_Vehicles & g_Players pointers need to be refreshed or nulled
@@ -1809,10 +1814,47 @@ uint8_t _declspec ( naked ) StreamedOutInfo ( void )
 	}
 }
 
+uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
+{
+	int dialogID,dialogType;
+	char *button1,*button2,*caption,*text;
+
+	__asm push esp
+	__asm movsx   eax, [esp+12] // get dialogType
+	__asm mov dialogType, eax
+	__asm movsx   eax, [esp+8] // get dialogID
+	__asm mov dialogID, eax
+	__asm lea     eax, [esp+0x14C]
+	__asm mov caption, eax
+	__asm lea     eax, [esp+0x254]
+	__asm mov button2, eax
+	__asm lea     eax, [esp+0x35C]
+	__asm mov button1, eax
+	__asm lea     eax, [esp+0x464]
+	__asm mov text, eax
+	__asm pop esp
+
+	char dCaption[200];
+	sprintf(dCaption,"%s",caption);
+	if(set.log_showed_dialogs)
+	{
+	Log("[SHOWDIALOG] Type: %d , ID: %d | Caption: %s, Text: %s, Button #1: %s, Button #2: %s",dialogType,dialogID,caption,text,button1,button2);
+	}
+	if(set.show_dialog_id)
+	{
+	sprintf(dCaption,"%s  [ID: %d]",caption,dialogID);
+	}
+	showSampDialog(1,dialogID,dialogType,dCaption,text,button1,button2);
+	//end
+	__asm mov ebx, g_dwSAMP_Addr
+}
+
+
 #define SAMP_HOOKPOS_ServerMessage			0x7973A//0x60D8A
 #define SAMP_HOOKPOS_ClientMessage 			0xDC0B//0xCF3E
 #define SAMP_HOOK_STATECHANGE				0x10FB8//0x10458
 #define SAMP_HOOK_StreamedOutInfo			0xF4DA//0xE7DE
+#define SAMP_HOOK_ShowDialog				0xBBF3//NEW
 void installSAMPHooks ()
 {
 	
@@ -1820,6 +1862,7 @@ void installSAMPHooks ()
 		return;
 	if(hooksinstalled == 1)
 		return;
+
 
 	hooksinstalled = 1;
 	CDetour api;
@@ -1835,14 +1878,14 @@ void installSAMPHooks ()
 		else
 			Log( "Failed to hook ServerMessage (memcmp)" );
 
-//		if ( memcmp_safe((uint8_t *)g_dwSAMP_Addr + SAMP_HOOKPOS_ClientMessage, hex_to_bin("663BD175"), 4) )
-	//	{
-	//		if ( api.Create((uint8_t *) ((uint32_t) g_dwSAMP_Addr) + SAMP_HOOKPOS_ClientMessage,
-//							 (uint8_t *)client_message_hook, DETOUR_TYPE_JMP, 5) == 0 )
-//				Log( "Failed to hook ClientMessage." );
-//		}
-	//	else
-	//		Log( "Failed to hook ClientMessage (memcmp)" );
+		if ( memcmp_safe((uint8_t *)g_dwSAMP_Addr + SAMP_HOOKPOS_ClientMessage, hex_to_bin("663BD175"), 4) )
+		{
+			if ( api.Create((uint8_t *) ((uint32_t) g_dwSAMP_Addr) + SAMP_HOOKPOS_ClientMessage,
+							 (uint8_t *)client_message_hook, DETOUR_TYPE_JMP, 5) == 0 )
+				Log( "Failed to hook ClientMessage." );
+		}
+		else
+			Log( "Failed to hook ClientMessage (memcmp)" );
 	}
 
 	if ( set.anti_carjacking )
@@ -1865,6 +1908,15 @@ void installSAMPHooks ()
 	}
 	else
 		Log( "Failed to hook StreamedOutInfo (memcmp)" );
+
+	if ( memcmp_safe((uint8_t *)g_dwSAMP_Addr + SAMP_HOOK_ShowDialog, hex_to_bin("E8"), 1) )
+	{
+		if ( api.Create((uint8_t *) ((uint32_t) g_dwSAMP_Addr) + SAMP_HOOK_ShowDialog,
+						 (uint8_t *)ShowDialogForPlayer, DETOUR_TYPE_CALL_FUNC, 5) == 0 )
+			Log( "Failed to hook ShowDialogForPlayer." );
+	}
+	else
+		Log( "Failed to hook ShowDialogForPlayer (memcmp)" );
 }
 
 #define SAMP_ONFOOTSENDRATE		0xE6098//0xE2098

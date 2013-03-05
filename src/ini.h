@@ -68,7 +68,8 @@ struct settings
 	int						i_have_edited_the_ini_file;
 	int						basic_mode;
 	int						fps_limit;
-
+	int						log_showed_dialogs;
+	int						show_dialog_id;
 	int						key_hp_cheat;
 	float					hp_minimum;
 	float					hp_regen;
