@@ -130,6 +130,9 @@ int RPC_ScrSetPlayerDrunkVisuals = 255;
 int RPC_ScrSetPlayerDrunkHandling = 255;
 int RPC_ScrDialogBox = 20;
 
+int lastDialogID = 65535;
+int lastDialogType = 65535;
+
 //TODO: Give/Take damage func, ClickPlayer, ClickTextdraw, Menu
 
 void SendWastedNotification(BYTE byteDeathReason, SHORT WhoWasResponsible)

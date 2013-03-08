@@ -2,8 +2,13 @@ mod_sa
 by notaplane, jflm, nuckfuts, bartekdvd, povargek and the game modification community
 http://code.google.com/p/m0d-m0d-s0beit-sa/
 
+Version 4.4.3.3
+* Added:
+Added a OnDialogResponse func (see samp.cpp) and DialogResponse Hook (don't conflict with SampFuncs by FYP)
+Fixed a showing a Dialog ID
+
 Version 4.4.3.2
-Added:
+* Added:
 Log of ShowDialogForPlayer (see mod_sa.ini)
 Show a SA:MP Dialog ID in dialog caption (see mod_sa.ini)
 

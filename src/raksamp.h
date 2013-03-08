@@ -202,6 +202,8 @@ extern int RPC_ScrSetPlayerDrunkHandling;
 extern int RPC_ScrDialogBox;
 extern int RPC_PlayerUpdate;
 
+extern int lastDialogID;
+extern int lastDialogType;
 
 void SendWastedNotification(BYTE byteDeathReason, SHORT WhoWasResponsible);
 void SendFakeUnoccupiedSyncData(USHORT VehicleID, float fPos[3]);

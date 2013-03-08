@@ -7,7 +7,7 @@
 !define NAME 'mod_sa'
 !define MP 'SA-MP'
 !define MP_VERSION 'v0.3x R1'
-!define VERSION 'v4.4.3.2'
+!define VERSION 'v4.4.3.3'
 !define M0D_AUTHOR 'by povargek for cheat-master.ru'
 
 ; create output directory if it doesn't exist

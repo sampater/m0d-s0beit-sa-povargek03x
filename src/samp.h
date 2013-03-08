@@ -55,6 +55,11 @@
 #define SAMP_PATCH_NOCARCOLORRESETTING 0x76370//A67B0 (by Sapas)
 #define SAMP_DRAWTEXTLABELS    0x85A37//6BF37 (by Sapas)
 
+#define DIALOG_TYPE_MSGBOX		0// (by povargek)
+#define DIALOG_TYPE_INPUT		1// (by povargek)
+#define DIALOG_TYPE_LIST		2// (by povargek)
+#define DIALOG_TYPE_PASSWORD	3// (by povargek)
+
 //by FYP >
 #define GAMESTATE_AWAIT_JOIN			12
 #define GAMESTATE_RESTARTING			17
@@ -128,6 +133,13 @@ struct stSAMP
 	RakClientInterface		*pRakClientInterface;
 	struct stSampSettings	*pSettings;
 	struct stSAMPPools		 pPools;
+};
+
+struct stDialog
+{
+	int iSend;
+	int iDialogID;
+	int iType;
 };
 
 struct stSampSettings
@@ -806,6 +818,7 @@ extern int										iIsSAMPSupported;
 extern int										hooksinstalled;
 extern int										g_renderSAMP_initSAMPstructs;
 extern struct stSAMP							*g_SAMP;
+extern struct stDialog							*g_Dialog;
 extern struct stSAMPs							*g_SAMPs;
 extern struct stPlayerPool						*g_Players;
 extern struct stVehiclePool						*g_Vehicles;

@@ -67,7 +67,7 @@ cd "%m_Path%"
 echo.
 echo -----------------------------------------------------------
 :: save the sourcecode
-SET /p version_m0d=Please enter version (ie 4.4.0.5):  
+SET /p version_m0d=Please enter version (ie 4.4.3.3):  
 SET dir_m0d=mod_sa_v%version_m0d%_source
 move /Y "%m_TempSubRelPath%" "%m_TempRelPath%\%dir_m0d%" > NUL
 IF EXIST "%m_OutputRelPath%\%dir_m0d%.7z" del /F /Q "%m_OutputRelPath%\%dir_m0d%.7z"

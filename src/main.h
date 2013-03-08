@@ -28,7 +28,7 @@
 
 
 #define M0D_NAME		"mod_sa"
-#define M0D_VERSION		"4.4.3.2"
+#define M0D_VERSION		"4.4.3.3"
 #define M0D_AUTHOR		"by povargek"
 #define SAMP_VERSION	"SA:MP 0.3x"
 

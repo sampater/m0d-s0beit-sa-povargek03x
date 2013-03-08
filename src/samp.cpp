@@ -28,15 +28,16 @@
 
 //randomStuff
 RakClientInterface		*raknet;
-extern int						iViewingInfoPlayer;
 int								g_iSpectateEnabled = 0, g_iSpectateLock = 0, g_iSpectatePlayerID = -1;
 int								g_iCursorEnabled = 0;
+
 
 // global samp pointers
 int								iIsSAMPSupported = 0;
 int								hooksinstalled = 0;
 int								g_renderSAMP_initSAMPstructs;
 stSAMP							*g_SAMP = NULL;
+stDialog						*g_Dialog = NULL;
 stSAMPs							*g_SAMPs = NULL;
 stPlayerPool					*g_Players = NULL;
 stVehiclePool					*g_Vehicles = NULL;
@@ -110,7 +111,6 @@ void update_translateGTASAMP_pedPool ( void )
 }
 
 //ClientCommands
-
 
 extern int	joining_server;
 void cmd_change_server ( char *param )	//127.0.0.1 7777 Username Password
@@ -460,7 +460,6 @@ void getSamp ()
 	memset_safe((uint32_t *)(g_dwSAMP_Addr + 0x60FF0), 0xC3, 1); //0.3x R1 (by Sapas)
 	memset_safe((uint32_t *)(g_dwSAMP_Addr + 0x61380), 0xC3, 1); //0.3x R1-2 (by povargek)
     ///////////////////////
-				
 
 		
 	iIsSAMPSupported = 1;
@@ -709,6 +708,10 @@ void spectateHandle()
 
 void showSampDialog(int send, int dialogID,int typedialog, char *caption,char *text, char *button1, char *button2)
 {
+	traceLastFunc( "showSampDialog()" );
+
+	lastDialogID = dialogID;
+
 	uint32_t func = g_dwSAMP_Addr+SAMP_DIALOG_SHOW;
 	uint32_t data = g_dwSAMP_Addr+SAMP_DIALOG_INFO_OFFSET;
 
@@ -1574,6 +1577,13 @@ void setSpecialAction ( uint8_t byteSpecialAction )
 	__asm pop ecx
 }
 
+void OnDialogResponse(int raknetused, int listitem, int button, char* inputtext, int dialogID = 65535)
+{
+	//dont't call this func! 
+	if ( g_SAMP == NULL )
+		return;
+}
+
 //#define FUNC_SENDSCMEVENT	0x18A0
 void sendSCMEvent ( int iEvent, int iVehicleID, int iParam1, int iParam2 )
 {
@@ -1818,12 +1828,12 @@ uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
 {
 	int dialogID,dialogType;
 	char *button1,*button2,*caption,*text;
-
+	__asm push eax
+	__asm mov dialogID, eax // get dialogID
+	__asm pop eax
 	__asm push esp
 	__asm movsx   eax, [esp+12] // get dialogType
 	__asm mov dialogType, eax
-	__asm movsx   eax, [esp+8] // get dialogID
-	__asm mov dialogID, eax
 	__asm lea     eax, [esp+0x14C]
 	__asm mov caption, eax
 	__asm lea     eax, [esp+0x254]
@@ -1855,12 +1865,57 @@ uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
 	__asm mov ebx, g_dwSAMP_Addr
 }
 
+int dialogID,listitem,button,tempo;
+char *inputtext;
+void	*tempo2 = dll_baseptr_get("SAMPFUNCS by FYP v2.3.cleo");
+#define HOOK_CALL_DIALOGRESPONSE	0x80862//NEW
+uint8_t _declspec ( naked ) DialogResponse ( void ) // by povargek
+{
+
+	if(tempo2 != 0x0)
+	{
+	//SAMPFUNCS detected!
+	}
+	__asm push eax
+	__asm pop eax
+	__asm push ebx
+	__asm mov tempo, ebx
+	__asm pop ebx
+	__asm push ebp
+	__asm mov listitem, ebp
+	__asm pop ebp
+	__asm push esp
+	__asm movsx   eax, [esp+0x1C0]
+	__asm mov button, eax
+	__asm lea   eax, [esp+0x1C]
+	__asm mov inputtext, eax
+	__asm pop esp
+	__asm push edx
+	__asm pop edx
+
+	dialogID = lastDialogID;
+
+	if(button < 0)
+	button = 1;
+	else
+    button = 0;
+
+OnDialogResponse(1, listitem, button, inputtext, dialogID);
+SendDialogResponse(dialogID,button,listitem,inputtext); 
+
+	//end
+	__asm mov ebx, g_dwSAMP_Addr
+	__asm add ebx, HOOK_CALL_DIALOGRESPONSE
+	__asm jmp ebx
+}
+
 
 #define SAMP_HOOKPOS_ServerMessage			0x7973A//0x60D8A
 #define SAMP_HOOKPOS_ClientMessage 			0xDC0B//0xCF3E
 #define SAMP_HOOK_STATECHANGE				0x10FB8//0x10458
 #define SAMP_HOOK_StreamedOutInfo			0xF4DA//0xE7DE
 #define SAMP_HOOK_ShowDialog				0xBBF3//NEW
+#define SAMP_HOOK_DialogResponse			0x8083D//NEW
 void installSAMPHooks ()
 {
 	
@@ -1923,6 +1978,16 @@ void installSAMPHooks ()
 	}
 	else
 		Log( "Failed to hook ShowDialogForPlayer (memcmp)" );
+
+	if ( memcmp_safe((uint8_t *)g_dwSAMP_Addr + SAMP_HOOK_DialogResponse, hex_to_bin("A1"), 1) )
+	{
+		if ( api.Create((uint8_t *) ((uint32_t) g_dwSAMP_Addr) + SAMP_HOOK_DialogResponse,
+						 (uint8_t *)DialogResponse, DETOUR_TYPE_JMP, 5) == 0 )
+		Log( "Failed to hook DialogResponse." );
+	}
+	else
+		Log( "Failed to hook DialogResponse (memcmp)" );
+
 }
 
 #define SAMP_ONFOOTSENDRATE		0xE6098//0xE2098
