@@ -758,7 +758,7 @@ uint32_t										getSampAddress ();
 
 char*											getServerIP(void);	
 struct stSAMP									*stGetSampInfo ( void );
-struct RakClientInterface						*stGetRakNet ( void );
+class RakClientInterface						*stGetRakNet ( void );
 struct stChatInfo								*stGetSampChatInfo ( void );
 struct stInputInfo								*stGetInputInfo ( void );
 struct stKillInfo								*stGetKillInfo ( void );

@@ -530,7 +530,7 @@ struct stSAMP *stGetSampInfo ( void )
 	return (struct stSAMP *)info_ptr;
 }
 
-struct RakClientInterface *stGetRakNet ( void )
+class RakClientInterface *stGetRakNet ( void )
 {
 	if ( g_dwSAMP_Addr == NULL )
 		return NULL;
@@ -540,7 +540,7 @@ struct RakClientInterface *stGetRakNet ( void )
 	if ( info_ptr == NULL )
 		return NULL;
 
-	return (struct RakClientInterface *)info_ptr;
+	return (class RakClientInterface *)info_ptr;
 }
 
 struct stSAMPs *stGetSampsInfo ( void )
@@ -1824,28 +1824,30 @@ uint8_t _declspec ( naked ) StreamedOutInfo ( void )
 	}
 }
 
+int dialogID,dialogType;
+char *button1,*button2,*caption,*text;
+char dCaption[200];
 uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
 {
-	int dialogID,dialogType;
-	char *button1,*button2,*caption,*text;
-	__asm push eax
-	__asm mov dialogID, eax // get dialogID
-	__asm pop eax
-	__asm push esp
-	__asm movsx   eax, [esp+12] // get dialogType
-	__asm mov dialogType, eax
-	__asm lea     eax, [esp+0x14C]
-	__asm mov caption, eax
-	__asm lea     eax, [esp+0x254]
-	__asm mov button2, eax
-	__asm lea     eax, [esp+0x35C]
-	__asm mov button1, eax
-	__asm lea     eax, [esp+0x464]
-	__asm mov text, eax
-	__asm pop esp
+	__asm 
+	{
+	push eax
+	mov dialogID, eax // get dialogID
+	movsx   eax, [esp+12] // get dialogType
+	mov dialogType, eax
+	lea     eax, [esp+0x14C]
+	mov caption, eax
+	lea     eax, [esp+0x254]
+	mov button2, eax
+	lea     eax, [esp+0x35C]
+	mov button1, eax
+	lea     eax, [esp+0x464]
+	mov text, eax
+	pop eax
+	}
 
-	char dCaption[200];
-	sprintf(dCaption,"%s",caption);
+	_asm pushad
+	sprintf_s(dCaption,"%s",caption);
 	if(!cheat_state->_generic.cheat_panic_enabled)
 	{
 	if(set.log_showed_dialogs)
@@ -1857,15 +1859,17 @@ uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
 	}
 	if(set.show_dialog_id)
 	{
-	sprintf(dCaption,"%s  [ID: %d]",caption,dialogID);
+	sprintf_s(dCaption,"%s  [ID: %d]",caption,dialogID);
 	}
 	}
 	showSampDialog(1,dialogID,dialogType,dCaption,text,button1,button2);
+	_asm popad
+
 	//end
 	__asm mov ebx, g_dwSAMP_Addr
 }
 
-int dialogID,listitem,button,tempo;
+int button,dialogID2,listitem,tempo;
 char *inputtext;
 void	*tempo2 = dll_baseptr_get("SAMPFUNCS by FYP v2.3.cleo");
 #define HOOK_CALL_DIALOGRESPONSE	0x80862//NEW
@@ -1876,32 +1880,33 @@ uint8_t _declspec ( naked ) DialogResponse ( void ) // by povargek
 	{
 	//SAMPFUNCS detected!
 	}
-	__asm push eax
-	__asm pop eax
-	__asm push ebx
-	__asm mov tempo, ebx
-	__asm pop ebx
-	__asm push ebp
-	__asm mov listitem, ebp
-	__asm pop ebp
-	__asm push esp
-	__asm movsx   eax, [esp+0x1C0]
-	__asm mov button, eax
-	__asm lea   eax, [esp+0x1C]
-	__asm mov inputtext, eax
-	__asm pop esp
-	__asm push edx
-	__asm pop edx
+	__asm 
+	{
+	push eax
+	push ebx
+	mov tempo, ebx
+	pop ebx
+	push ebp
+	mov listitem, ebp
+	pop ebp
+	movsx   eax, [esp+0x1C0]
+	mov button, eax
+	lea   eax, [esp+0x1C]
+	mov inputtext, eax
+	pop eax
+	}
 
-	dialogID = lastDialogID;
-
-	if(button < 0)
-	button = 1;
+	_asm pushad
+	if(button > 0)
+	button = 0;
 	else
-    button = 0;
+	button = 1;
 
-OnDialogResponse(1, listitem, button, inputtext, dialogID);
-SendDialogResponse(dialogID,button,listitem,inputtext); 
+	dialogID2 = lastDialogID;
+
+OnDialogResponse(1, listitem, button, inputtext, dialogID2);
+SendDialogResponse(dialogID2,button,listitem,inputtext); 
+	_asm popad
 
 	//end
 	__asm mov ebx, g_dwSAMP_Addr
