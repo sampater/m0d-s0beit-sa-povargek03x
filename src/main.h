@@ -227,6 +227,7 @@ void							LogChatbox ( bool bLast, const char *fmt, ... );
 void							setDebugPointer ( void *ptr );
 
 // externals
+extern int						M0D_DIALOG;
 extern HMODULE					g_hDllModule;
 extern char						g_szWorkingDirectory[MAX_PATH];
 extern FILE						*g_flLog;

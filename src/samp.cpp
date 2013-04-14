@@ -848,6 +848,53 @@ void sampMainCheat ()
 	}
 }
 
+void cmd_listlog ( char *param )	//127.0.0.1 7777 Username Password
+{
+	int count = 0;
+	uint32_t	samp_info = (uint32_t) g_SAMP;
+	uint32_t	func = g_dwSAMP_Addr + SAMP_FUNCUPDATESCOREBOARDDATA;
+	__asm mov ecx, samp_info
+	__asm call func
+	int levelplayer = atoi(param);
+
+	 FILE    *flStolenObjects = NULL; 
+   char    filename[512]; 
+   snprintf( filename, sizeof(filename), "%s\\nicksplayers.txt", g_szWorkingDirectory); 
+
+   flStolenObjects = fopen( filename, "w" ); 
+   if (flStolenObjects == NULL)return; 
+
+   if(levelplayer == -1)
+   {
+	   for(int i = 0; i < SAMP_PLAYER_MAX; i++)
+	   {
+		   if(g_Players->iIsListed[i] == 1)
+		   {
+   fprintf(flStolenObjects, "%s\n",getPlayerName(i)); 
+		   count++;
+		   }
+	   }
+   }
+   else
+   {
+	   for(int i = 0; i < SAMP_PLAYER_MAX; i++)
+	   {
+		   if(g_Players->iIsListed[i] == 1)
+		   {
+			   if(g_Players->pRemotePlayer[i]->iScore >= levelplayer)
+			   {
+   fprintf(flStolenObjects, "%s\n",getPlayerName(i)); 
+			   count++;
+			   }
+		   }
+	   }
+   }
+	fclose(flStolenObjects); 
+	char lol[400];
+	sprintf_s(lol,"Nicks %d players copy to file nicksplayers.txt!",count);
+    showSampDialog(0,3,0,"Suncess!",lol,"Close","");
+}
+
 int getNthPlayerID ( int n )
 {
 	if ( g_Players == NULL )
@@ -1285,11 +1332,11 @@ void init_samp_chat_cmds ()
 	addClientCommand( "setmyhp", (int)cmd_setmyhp);
 	addClientCommand( "spawnc", (int)cmd_spawnc);
 	addClientCommand( "sendclass", (int)cmd_sendclass);
+	addClientCommand( "listlog", (int)cmd_listlog );
 	addClientCommand( "m0d_change_server", (int)cmd_change_server );
 	addClientCommand( "m0d_fav_server", (int)cmd_change_server_fav );
 	addClientCommand( "m0d_current_server", (int)cmd_current_server );
 	addClientCommand( "m0d_tele_loc", (int)cmd_tele_loc );
-	addClientCommand( "m0d_teleport_location", (int)cmd_tele_loc );
 	addClientCommand( "m0d_tele_locations", (int)cmd_tele_locations );
 	addClientCommand( "m0d_teleport_locations", (int)cmd_tele_locations );
 }
@@ -1871,15 +1918,9 @@ uint8_t _declspec ( naked ) ShowDialogForPlayer ( void ) // by povargek
 
 int button,dialogID2,listitem,tempo;
 char *inputtext;
-void	*tempo2 = dll_baseptr_get("SAMPFUNCS by FYP v2.3.cleo");
 #define HOOK_CALL_DIALOGRESPONSE	0x80862//NEW
 uint8_t _declspec ( naked ) DialogResponse ( void ) // by povargek
 {
-
-	if(tempo2 != 0x0)
-	{
-	//SAMPFUNCS detected!
-	}
 	__asm 
 	{
 	push eax
@@ -1975,6 +2016,8 @@ void installSAMPHooks ()
 	else
 		Log( "Failed to hook StreamedOutInfo (memcmp)" );
 
+	if(M0D_DIALOG)
+	{
 	if ( memcmp_safe((uint8_t *)g_dwSAMP_Addr + SAMP_HOOK_ShowDialog, hex_to_bin("E8"), 1) )
 	{
 		if ( api.Create((uint8_t *) ((uint32_t) g_dwSAMP_Addr) + SAMP_HOOK_ShowDialog,
@@ -1992,7 +2035,8 @@ void installSAMPHooks ()
 	}
 	else
 		Log( "Failed to hook DialogResponse (memcmp)" );
-
+	}
+		
 }
 
 #define SAMP_ONFOOTSENDRATE		0xE6098//0xE2098

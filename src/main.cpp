@@ -22,6 +22,7 @@
 */
 #include "main.h"
 
+int						M0D_DIALOG = true;
 HINSTANCE				g_hOrigDll = NULL;
 HMODULE					g_hDllModule = NULL;
 char					g_szWorkingDirectory[MAX_PATH];
@@ -286,7 +287,7 @@ static int init ( void )
 				"Before you can use mod_sa, you have to set \"i_have_edited_the_ini_file\" to true.\n"
 				"We did this so you would read the INI file to see the configurability of mod_sa.\n",
 				"You're a retard.", 0 );
-			ShellExecute( 0, "open", "notepad", INI_FILE, g_szWorkingDirectory, SW_SHOW );
+			ShellExecuteA( 0, "open", "notepad", INI_FILE, g_szWorkingDirectory, SW_SHOW );
 			return 0;
 		}
 
