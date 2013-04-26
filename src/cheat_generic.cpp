@@ -573,14 +573,14 @@ void cheat_handle_hp ( struct vehicle_info *vehicle_info, struct actor_info *act
 	if ( cheat_state->_generic.hp_cheat && cheat_state->actor.invulnerable )
 	{
 		patcher_install( &patch_actor_hp );
-	patcher_install( &patch_actor_hp2 );
-	patcher_install( &patch_actor_hp3 );
+	//patcher_install( &patch_actor_hp2 );
+	//patcher_install( &patch_actor_hp3 );
 	}
 	else
 	{
 		patcher_remove( &patch_actor_hp );
-	patcher_remove( &patch_actor_hp2 );
-	patcher_remove( &patch_actor_hp3 );
+	//patcher_remove( &patch_actor_hp2 );
+	//patcher_remove( &patch_actor_hp3 );
 	}
 
 	if ( cheat_state->_generic.hp_cheat && cheat_state->vehicle.invulnerable )

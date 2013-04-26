@@ -3876,10 +3876,6 @@ no_render: ;
 	if(g_SAMP == NULL && stGetSampInfo() != 0 && iIsSAMPSupported == 1)
 	{
 				iIsSAMPSupported = 1;
-				g_SAMP = stGetSampInfo();
-				g_Chat = stGetSampChatInfo();
-				g_Input = stGetInputInfo();
-				g_DeathList = stGetKillInfo();
 				//installSAMPHooks();
 	}
 	traceLastFunc( "it_wasnt_us()" );

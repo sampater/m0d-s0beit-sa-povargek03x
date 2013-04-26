@@ -23,8 +23,8 @@
 #include "main.h"
 
 #define SAMP_DLL		"samp.dll"
-#define SAMP_CMP03XR1	"088B0E8B4508D1E1F7D1"
-#define SAMP_CMP03XR2	"8D442410508D4C241CC7"
+#define SAMP_CMP03XR1	"8D442410508D4C241CC7"
+#define SAMP_CMP03XR2	"6A016A088D4C240F518D"
 
 //randomStuff
 RakClientInterface		*raknet;
@@ -35,6 +35,7 @@ int								g_iCursorEnabled = 0;
 // global samp pointers
 int								iIsSAMPSupported = 0;
 int								hooksinstalled = 0;
+bool							iSAMP03XR2;
 int								g_renderSAMP_initSAMPstructs;
 stSAMP							*g_SAMP = NULL;
 stDialog						*g_Dialog = NULL;
@@ -280,6 +281,15 @@ void cmd_sendclass ( char *param )	//127.0.0.1 7777 Username Password
 	raknet->RPC(&RPC_RequestClass, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, 0);
 }
 
+void cmd_sendrow ( char *param )	//127.0.0.1 7777 Username Password
+{
+	raknet = stGetRakNet();
+	int rowid = atoi(param);
+	RakNet::BitStream bs;
+	bs.Write(rowid);
+	raknet->RPC(&RPC_MenuSelect, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, 0);
+}
+
 void cmd_spawnc ( char *param )	//127.0.0.1 7777 Username Password
 {
 	raknet = stGetRakNet();
@@ -450,27 +460,37 @@ void getSamp ()
 		if ( g_dwSAMP_Addr != NULL )
 		{
 			
-			if (memcmp_safe((uint8_t *)g_dwSAMP_Addr + 0xBABE, hex_to_bin(SAMP_CMP03XR2), 10))
+			if (memcmp_safe((uint8_t *)g_dwSAMP_Addr + 0xBABE, hex_to_bin(SAMP_CMP03XR1), 10))
 			{
 			
-				
+				iSAMP03XR2 = false;
 				strcpy(g_szSAMPVer, "SA:MP 0.3x R1");
 				Log( "%s was detected. g_dwSAMP_Addr: 0x%p", g_szSAMPVer, g_dwSAMP_Addr );
 	///Fuck OFF AntiCheat///
 	memset_safe((uint32_t *)(g_dwSAMP_Addr + 0x60FF0), 0xC3, 1); //0.3x R1 (by Sapas)
-	memset_safe((uint32_t *)(g_dwSAMP_Addr + 0x61380), 0xC3, 1); //0.3x R1-2 (by povargek)
     ///////////////////////
 
 		
 	iIsSAMPSupported = 1;
 			}
 			
+			else if (memcmp_safe((uint8_t *)g_dwSAMP_Addr + 0xBAE7, hex_to_bin(SAMP_CMP03XR2), 10))
+			{
 			
+				iSAMP03XR2 = true;
+				strcpy(g_szSAMPVer, "SA:MP 0.3x R1-2");
+				Log( "%s was detected. g_dwSAMP_Addr: 0x%p", g_szSAMPVer, g_dwSAMP_Addr );
+	///Fuck OFF AntiCheat///
+	memset_safe((uint32_t *)(g_dwSAMP_Addr + 0x61380), 0xC3, 1); //0.3x R1-2 (by povargek)
+    ///////////////////////
+
+		
+	iIsSAMPSupported = 1;
+			}
 
 			else
 			{
 				Log( "Unknown SA:MP version. Running in basic mode." );
-				iIsSAMPSupported = 0;
 				
 				set.basic_mode = true;
 				SAMP_Add = ( uint32_t ) samp_dll;
@@ -738,7 +758,9 @@ void sampMainCheat ()
 		}
 
 	// anticrasher by povargek
+	if(!iSAMP03XR2)
 	memset_safe((DWORD*)(g_dwSAMP_Addr + SAMP_WARNING_COUNT), 0x00, 1);
+
 	// g_Vehicles & g_Players pointers need to be refreshed or nulled
 	if ( isBadPtr_writeAny(g_SAMP->pPools.pPool_Vehicle, sizeof(stVehiclePool)) )
 		g_Vehicles = NULL;
@@ -1276,6 +1298,8 @@ void cmd_showCMDS ()
 #define FUNC_ADDCLIENTCMD	0x7A8C0//0x61EE0
 void addClientCommand ( char *name, int function )
 {
+	traceLastFunc("addClientCommand ()");
+	Log("addClientCommand()");
 	g_Input = stGetInputInfo();
 	if ( name == NULL || function == NULL || g_Input == NULL )
 		return;
@@ -1330,15 +1354,10 @@ void init_samp_chat_cmds ()
 
 	addClientCommand( "sendpic", (int)cmd_sendpic);
 	addClientCommand( "setmyhp", (int)cmd_setmyhp);
-	addClientCommand( "spawnc", (int)cmd_spawnc);
+	//addClientCommand( "spawnc", (int)cmd_spawnc);
 	addClientCommand( "sendclass", (int)cmd_sendclass);
+	addClientCommand( "sendrow", (int)cmd_sendrow);
 	addClientCommand( "listlog", (int)cmd_listlog );
-	addClientCommand( "m0d_change_server", (int)cmd_change_server );
-	addClientCommand( "m0d_fav_server", (int)cmd_change_server_fav );
-	addClientCommand( "m0d_current_server", (int)cmd_current_server );
-	addClientCommand( "m0d_tele_loc", (int)cmd_tele_loc );
-	addClientCommand( "m0d_tele_locations", (int)cmd_tele_locations );
-	addClientCommand( "m0d_teleport_locations", (int)cmd_tele_locations );
 }
 
 struct gui	*gui_samp_cheat_state_text = &set.guiset[1];
@@ -1414,7 +1433,7 @@ void addMessageToChatWindowSS ( const char *text, ... )
 #define FUNC_ADDTOCHATWND	0x79170//0x607D0
 void addToChatWindow ( char *text, D3DCOLOR textColor, int playerID )
 {
-	
+	traceLastFunc("addToChatWindow ()");
 	if ( stGetSampInfo() == NULL || stGetSampChatInfo == NULL )
 		return;
 
@@ -1964,7 +1983,8 @@ SendDialogResponse(dialogID2,button,listitem,inputtext);
 #define SAMP_HOOK_DialogResponse			0x8083D//NEW
 void installSAMPHooks ()
 {
-	
+	traceLastFunc("installSAMPHooks ()");
+
 	if( stGetSampInfo() == NULL )
 		return;
 	if(hooksinstalled == 1)

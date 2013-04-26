@@ -5,6 +5,9 @@ http://code.google.com/p/m0d-m0d-s0beit-sa/
 Version 4.4.3.4
 * Added:
 Fixed a fucking crash with dialogs!
+======================================
+* Added:
+You can disable a Dialogs Hook in main.cpp - int M0D_DIALOG, true of false
 
 Version 4.4.3.3
 * Added:

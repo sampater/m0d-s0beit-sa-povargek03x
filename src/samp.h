@@ -816,6 +816,7 @@ int												sampPatchDisableChatInputAdjust ( int iEnabled );
 // global pointer externals
 extern int										iIsSAMPSupported;
 extern int										hooksinstalled;
+extern bool										iSAMP03XR2;
 extern int										g_renderSAMP_initSAMPstructs;
 extern struct stSAMP							*g_SAMP;
 extern struct stDialog							*g_Dialog;
