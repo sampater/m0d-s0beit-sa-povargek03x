@@ -1,0 +1,1 @@
+Full support of 0.3x [R1](https://code.google.com/p/m0d-s0beit-sa-povargek03x/source/detail?r=1)
